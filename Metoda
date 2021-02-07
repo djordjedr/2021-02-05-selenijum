@@ -1,0 +1,123 @@
+package metode;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+
+import prozori.Pesma;
+import prozori.PustenaPesma;
+import prozori.YouTube;
+
+
+public class Metoda {
+	
+	 WebDriver driver;
+	 InputStream inp;
+	 XSSFWorkbook wb;
+	 Sheet sheet;
+	 Cell c2;
+	 String search2;
+	 
+
+	@BeforeClass
+	public void createDriver() {
+		System.setProperty("webdriver.chrome.driver", "C:\\NewChromedriver\\chromedriver.exe");
+		driver = new ChromeDriver();				
+	}
+	
+	@Test(priority=1)
+	public void testSearch() {
+		File f=new File ("Youtube.xlsx");
+		try {
+			inp = new FileInputStream(f);
+		
+		wb = new XSSFWorkbook(inp); // Pretvaranje fajla u odgovarajuci format
+		 sheet = wb.getSheetAt(0); // Dohvata sheet
+		Row row1 = sheet.getRow(0);// Dohvata red
+		Row row2 = sheet.getRow(0);
+		Cell c1=row1.getCell(0);
+		c2=row2.getCell(0);
+		String search1=c1.toString();
+		
+		driver.navigate().to(YouTube.URL);		//program krece od ovoga
+		YouTube.trazi(driver, search1);
+		Thread.sleep(5000);
+		wb.close();
+		
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // Citanje iz fajla
+		String actual = driver.getCurrentUrl();
+		String expected= Pesma.EXPECTED;
+		Assert.assertEquals(actual, expected);
+	}
+		
+	@Test(priority=2)
+	public void pustanjePesme() {
+		driver.navigate().to(Pesma.EXPECTED);		//program krece od ovoga
+		search2=c2.toString();						//malo sam se igrao sa apachie
+		Pesma.pesma(driver);
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		String actual = driver.getCurrentUrl();
+		String expected= PustenaPesma.EXPECTED;
+		Assert.assertEquals(actual, expected);
+		try {
+			Thread.sleep(7000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		PustenaPesma.preskociEPP(driver);
+		
+	}
+	
+	@Test(priority=3)
+	public void JosJednaPesma() {
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		PustenaPesma.Sacekaj(driver);
+		PustenaPesma.Maximiziranje(driver);
+		String actual = driver.getCurrentUrl();
+		String expected= PustenaPesma.ZAVRSNI;
+		Assert.assertEquals(actual, expected);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+	}
+	
+	@AfterClass()
+	public void zatvaranje() {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	   driver.quit();
+	   
+	}
+	
+	
+
+
+}
